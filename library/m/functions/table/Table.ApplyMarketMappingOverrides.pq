@@ -248,7 +248,6 @@ let
                                     NewValue = if HasMatch then ApplyAction(State[CurrentValue], WinningRule) else State[CurrentValue],
                                     ValueChanged = HasMatch and not (if State[CurrentValue] = null and NewValue = null then true else if State[CurrentValue] = null or NewValue = null then false else Text.From(State[CurrentValue]) = Text.From(NewValue)),
                                     MultipleRulesMatched = List.Count(MatchingRules) > 1,
-                                    MultipleGroupsApplied = ValueChanged and List.Count(State[AppliedGroups]) > 0,
                                     NewAppliedGroups = if ValueChanged then List.Combine({State[AppliedGroups], {Text.From(Group[RuleGroupID])}}) else State[AppliedGroups],
                                     NewAppliedRules = if ValueChanged then List.Combine({State[AppliedRules], {Text.From(WinningRule[RuleID])}}) else State[AppliedRules],
                                     StopAfter = HasMatch and Group[StopAfterRuleGroup] = true
@@ -257,7 +256,7 @@ let
                                         CurrentValue = NewValue,
                                         AppliedGroups = NewAppliedGroups,
                                         AppliedRules = NewAppliedRules,
-                                        Conflict = State[Conflict] or MultipleRulesMatched or MultipleGroupsApplied,
+                                        Conflict = State[Conflict] or MultipleRulesMatched,
                                         Stop = StopAfter
                                     ]
                     ),
