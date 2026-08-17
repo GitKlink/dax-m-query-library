@@ -18,6 +18,7 @@ This repository is a reusable analytics engineering library for Power Query (M),
 - Do not create empty taxonomy folders purely for completeness; create category folders when the first asset requires them.
 - Follow `docs/guides/github-communication.md` for Issues, pull requests, review comments, and status updates. Use the defined emoji vocabulary as visual icons for scanability, and make required human actions explicit with `🧑‍💻 Action required`.
 - Follow `docs/guides/git-workflow.md` for Git and GitHub workflow defaults. When an active Ask Matt / engineering skill prescribes a more specific workflow step, that skill takes precedence; the repo Git guide fills in the gaps.
+- Follow `docs/guides/documentation-style.md` for repository documentation. Default to visual-first, task-first, progressively disclosed documentation that is easy to scan, execute, pause, and resume. Keep detailed technical reference available without placing it in front of the happy path. Use one primary action per procedural step, keep exact code/values beside the action that uses them, and provide explicit checkpoints and expected results.
 
 ## Context precedence
 
