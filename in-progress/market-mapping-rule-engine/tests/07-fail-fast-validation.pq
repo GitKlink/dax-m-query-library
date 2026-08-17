@@ -36,7 +36,8 @@ let
     MissingMapColumn = ExpectError(RulesTable, Table.RemoveColumns(AttributeMap, {"DataType"}), TargetTable),
     DuplicateCanonical = ExpectError(RulesTable, Table.Combine({AttributeMap, Table.FirstN(AttributeMap, 1)}), TargetTable),
     MissingCanonicalMapping = ExpectError(RulesTable, Table.SelectRows(AttributeMap, each [CanonicalAttribute] <> "Scenario"), TargetTable),
-    MissingPhysicalColumn = ExpectError(RulesTable, Table.TransformRows(AttributeMap, each if [CanonicalAttribute] = "Scenario" then Record.TransformFields(_, {{"TargetColumn", each "MissingScenario"}}) else _ ) |> Table.FromRecords, TargetTable),
+    MissingPhysicalMap = Table.FromRecords(Table.TransformRows(AttributeMap, each if [CanonicalAttribute] = "Scenario" then Record.TransformFields(_, {{"TargetColumn", each "MissingScenario"}}) else _)),
+    MissingPhysicalColumn = ExpectError(RulesTable, MissingPhysicalMap, TargetTable),
 
     UnsupportedOperator = ExpectError(ReplaceRuleField("Operator", "Regex"), AttributeMap, TargetTable),
     UnsupportedAction = ExpectError(ReplaceRuleField("ActionType", "Append"), AttributeMap, TargetTable),
