@@ -1,7 +1,7 @@
 # ADR 002: Canonical AttributeMap decouples rules from target schemas
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 The same rule configuration may be applied to target tables whose physical column names differ across extracts or models.
