@@ -1,7 +1,7 @@
 # ADR 001: Ordered RuleGroups with first-match RuleIDs
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 Mapping exceptions need AND conditions, ordered alternatives, and potentially sequential transformations without introducing an arbitrary Boolean expression language.
