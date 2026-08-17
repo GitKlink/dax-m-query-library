@@ -19,6 +19,7 @@ This repository is a reusable analytics engineering library for Power Query (M),
 - Follow `docs/guides/github-communication.md` for Issues, pull requests, review comments, and status updates. Use the defined emoji vocabulary as visual icons for scanability, and make required human actions explicit with `🧑‍💻 Action required`.
 - Follow `docs/guides/git-workflow.md` for Git and GitHub workflow defaults. When an active Ask Matt / engineering skill prescribes a more specific workflow step, that skill takes precedence; the repo Git guide fills in the gaps.
 - Follow `docs/guides/documentation-style.md` for repository documentation. Default to visual-first, task-first, progressively disclosed documentation that is easy to scan, execute, pause, and resume. Keep detailed technical reference available without placing it in front of the happy path. Use one primary action per procedural step, keep exact code/values beside the action that uses them, and provide explicit checkpoints and expected results.
+- Follow `docs/guides/human-ai-collaboration-workflow.md` for collaborative workflow. GitHub is the shared workflow interface; do not rely on private AI-chat context for information another collaborator needs. Use human assignees for genuine human ownership, agent-state labels such as `ready-for-agent` / `ready-for-human` for who can act next, keep Issues and PRs self-contained, and continue agent work until a genuine human gate is reached.
 
 ## Context precedence
 
