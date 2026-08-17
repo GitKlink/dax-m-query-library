@@ -90,7 +90,11 @@ let
             Mode = Text.Upper(Text.Trim(OutputMode)),
             _ValidateOutputMode = if not List.Contains({"REPLACE", "ADDCOLUMN"}, Mode) then Raise("OutputMode must be Replace or AddColumn.", OutputMode) else null,
             ResultColumnName = if OutputColumnName = null or Text.Trim(OutputColumnName) = "" then "MarketDataCode_Override" else Text.Trim(OutputColumnName),
-            _ValidateResultColumn = if Mode = "ADDCOLUMN" and List.Contains(Table.ColumnNames(TargetTable), ResultColumnName) then Raise("OutputColumnName already exists in TargetTable.", ResultColumnName) else null,
+            _ValidateResultColumn =
+                if Mode = "ADDCOLUMN" and (List.Contains(Table.ColumnNames(TargetTable), ResultColumnName) or List.Contains(AuditColumns, ResultColumnName)) then
+                    Raise("OutputColumnName conflicts with an existing or reserved output column.", ResultColumnName)
+                else
+                    null,
 
             InvalidOperators = List.Difference(List.Distinct(List.Transform(ActiveRules[Operator], each Text.Upper(Text.Trim(Text.From(_))))), SupportedOperators),
             _ValidateOperators = if List.Count(InvalidOperators) > 0 then Raise("RulesTable contains unsupported operators.", InvalidOperators) else null,
