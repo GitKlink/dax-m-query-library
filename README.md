@@ -1,59 +1,84 @@
-# DAX & M Query Library
+# Analytics Library
 
-Reusable library of custom Power Query (M) functions, DAX patterns, utilities, and examples for Power BI development, data modelling, transformation, reporting, and analytics.
+Reusable Power BI and analytics engineering library containing Power Query (M), DAX, Python, and Deneb functions, patterns, utilities, visuals, and examples.
 
-## Repository structure
+## Repository model
+
+This repository separates **feature engineering** from **published reusable assets**.
 
 ```text
-.
-├── AGENTS.md
-├── CONTEXT.md
-├── README.md
-├── dax/
-│   ├── measures/
-│   └── patterns/
+library/        Published, reusable assets
+in-progress/    Active feature engineering records
+features/       Completed feature engineering records
+docs/           Repository-wide standards, ADRs, and agent conventions
+```
+
+A feature is the primary unit of development. A feature normally produces one reusable asset or one tightly related asset family, for example:
+
+- an M custom function or pattern;
+- a DAX measure, measure family, UDF, or pattern;
+- a Python function, script, or analytics pattern;
+- a Deneb visual, template, or Vega/Vega-Lite pattern.
+
+## Development lifecycle
+
+```text
+GitHub Issue
+    ↓
+in-progress/<feature>/
+    ├── README.md
+    ├── spec.md
+    ├── adr/
+    ├── tests/
+    ├── examples/
+    └── experiments/   (only when useful)
+    ↓
+feature branch implementation
+    ↓
+review / PR
+    ↓
+published asset under library/
+    ↓
+engineering record moves to features/<feature>/
+```
+
+Use one independently deliverable feature per GitHub Issue and feature branch unless a spec explicitly defines a tightly coupled set.
+
+## Published library
+
+```text
+library/
 ├── m/
 │   ├── functions/
 │   └── patterns/
-├── docs/
-│   ├── adr/
-│   ├── agents/
-│   └── specs/
-└── examples/
+├── dax/
+│   ├── measures/
+│   ├── udfs/
+│   └── patterns/
+├── python/
+│   ├── functions/
+│   ├── scripts/
+│   └── patterns/
+└── deneb/
+    ├── visuals/
+    ├── templates/
+    └── patterns/
 ```
 
-### M
+Subfolders should be created when an asset actually needs them rather than pre-populating empty taxonomy folders.
 
-- `m/functions/` — reusable Power Query functions.
-- `m/patterns/` — reusable transformation/query patterns that are not standalone functions.
+## Agent / Ask Matt compatibility
 
-### DAX
+Repository-wide context starts with:
 
-- `dax/measures/` — reusable measure implementations and measure families.
-- `dax/patterns/` — reusable modelling/calculation patterns and worked examples.
+- `AGENTS.md`
+- `CONTEXT.md`
+- `docs/agents/`
+- `docs/adr/`
+- `docs/guides/`
 
-### Documentation
+Feature-specific context lives inside the relevant `in-progress/<feature>/` or `features/<feature>/` folder. Ask Matt / engineering workflows should resolve repository rules first, then feature-specific context.
 
-- `docs/specs/` — feature and design specifications.
-- `docs/adr/` — architecture decision records.
-- `docs/agents/` — repository-local workflow conventions used by engineering/Ask Matt skills.
-- `CONTEXT.md` — domain vocabulary, repository boundaries, and durable design context.
-- `AGENTS.md` — concise instructions for agents working in this repository.
+## Public repository policy
 
-### Examples
-
-- `examples/` — synthetic examples and demonstrations. Do not commit confidential employee, remuneration, company, survey-vendor, SharePoint, or other proprietary data.
-
-## Development workflow
-
-GitHub Issues is the canonical issue tracker. Significant additions should generally follow:
-
-```text
-grill-with-docs → to-spec → to-tickets → implement → code-review
-```
-
-See `AGENTS.md` and `docs/agents/` for repository-specific workflow conventions.
-
-## Public-repository rule
-
-Use synthetic/anonymised examples only. Do not commit credentials, private URLs, real employee data, confidential business rules, proprietary market survey data, or internal company identifiers.
+Use synthetic examples and fixtures. Do not commit confidential employee/remuneration data, proprietary survey data, private URLs, secrets, tokens, or company-specific material that is not intended for public release.
