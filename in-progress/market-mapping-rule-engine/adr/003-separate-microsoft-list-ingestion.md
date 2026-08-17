@@ -1,7 +1,7 @@
 # ADR 003: Keep Microsoft List ingestion outside the rule engine
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 Microsoft List is the intended operational configuration source, but connector-specific Choice/boolean/internal-name shapes are unrelated to rule evaluation and would make the core engine harder to test and reuse.
