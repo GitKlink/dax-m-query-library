@@ -1,7 +1,7 @@
 # ADR 004: Global output mode plus explicit audit columns
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 Testing and reconciliation require preserving baseline values, while production use may need the existing market-code column replaced. Rule-level output behavior would unnecessarily complicate configuration. Audit fields also need clear semantics for matched rules, applied transformations, and conflicts.
