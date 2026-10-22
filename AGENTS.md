@@ -14,6 +14,7 @@ This repository is a reusable analytics engineering library for Power Query (M),
 - Separate reusable engine logic from ingestion/connector logic where practical.
 - Prefer synthetic test/example data. Never add confidential employee, remuneration, company, survey-vendor, private SharePoint, credential, or proprietary source data.
 - Preserve public APIs/behaviour unless an approved specification explicitly changes them.
+- Use **Power BI / Fabric Architect** for the orchestrator project, **Power BI / Fabric Engineering Standards** for normative policy, and **DAX/M Query Library** for this implementation library. **Wayfinder** means Matt Pocock's planning skill only; do not use it to name our product.
 - Keep durable repository vocabulary and repo-wide assumptions in `CONTEXT.md`.
 - Do not create empty taxonomy folders purely for completeness; create category folders when the first asset requires them.
 - Follow `docs/guides/github-communication.md` for Issues, pull requests, review comments, and status updates. Use the defined emoji vocabulary as visual icons for scanability, and make required human actions explicit with `🧑‍💻 Action required`.
