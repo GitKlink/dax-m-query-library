@@ -161,6 +161,11 @@ let
                 )
             ),
 
+            ManagerParentLookup = Record.FromList(
+                List.Repeat({true}, List.Count(ManagersWithManagerReports)),
+                ManagersWithManagerReports
+            ),
+
             // Walk upwards from the worker; prepend higher ancestors so
             // levels are root-first. Never append the starting worker ID.
             GetAncestorIDs = (workerID as text) as list =>
@@ -229,7 +234,7 @@ let
                             isManager,
                             not isManager,
                             directCount,
-                            List.Contains(ManagersWithManagerReports, workerID),
+                            Record.HasFields(ManagerParentLookup, workerID),
                             depth,
                             depth > 0,
                             if depth = 0 then null else Text.Combine(ancestorIDs, "|")
@@ -269,6 +274,28 @@ let
                 } & LevelTypes
             )
         in
-            Typed
+            Typed,
+
+    Documentation = [
+        Documentation.Name = "Table.FlattenManagerHierarchy",
+        Documentation.Description = "Create ancestor-only, manager-level hierarchy columns without dropping workers.",
+        Documentation.LongDescription = "Accepts a unique worker ID, immediate manager ID and display name. Returns every worker row with root-first strict-ancestor manager name/key levels and structural manager metadata. Rejects duplicate workers, unknown parents and cycles. This is not a multi-parent flattening function.",
+        Documentation.Category = "Table",
+        Documentation.Version = "0.1.0-preview",
+        Documentation.Source = "GitKlink/dax-m-query-library",
+        Documentation.Author = "GitKlink",
+        Documentation.Examples = {
+            [
+                Description = "Create manager-only hierarchy levels for a worker table.",
+                Code = "#""Table.FlattenManagerHierarchy""(Workers, ""EmployeeID"", ""ManagerID"", ""EmployeeName"")",
+                Result = "All worker rows with Manager Level 1, Manager Level 2, etc."
+            ]
+        }
+    ],
+
+    Documented = Value.ReplaceType(
+        Table.FlattenManagerHierarchy,
+        Value.ReplaceMetadata(Value.Type(Table.FlattenManagerHierarchy), Documentation)
+    )
 in
-    Table.FlattenManagerHierarchy
+    Documented
