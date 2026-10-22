@@ -67,6 +67,16 @@ library/
 
 Subfolders should be created when an asset actually needs them rather than pre-populating empty taxonomy folders.
 
+## Where this library fits
+
+This is the **reusable implementation library**, not the project's AI architect, engineering-policy source or installer.
+
+- **[Power BI / Fabric Architect](https://github.com/GitKlink/performance-reward-dashboard-architect)** orchestrates cross-repository Power BI/Fabric reviews and future installation. The [read-only DAX Measure Standards Reviewer](https://github.com/GitKlink/performance-reward-dashboard-architect/tree/main/.agents/skills/dax-measure-standards-review) is implemented there, **not in this library**.
+- **[Power BI / Fabric Engineering Standards](https://github.com/GitKlink/power-bi-fabric-standards)** publishes the canonical naming, metadata, semantic-model and other engineering policies. This library *consumes* approved standards but does not maintain conflicting copies.
+- **Performance & Reward domain authority** governs business meaning, population, eligibility and KPI semantics. Library examples are not approved business definitions.
+
+**Terminology:** **Wayfinder** is Matt Pocock's planning skill used for early project research. It is not our product name, installer, agent or architecture layer. Ask Matt is a workflow tool, not the identity of this library.
+
 ## Agent / Ask Matt compatibility
 
 Repository-wide context starts with:
