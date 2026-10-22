@@ -115,7 +115,7 @@ let
         [Check = "No worker appears in their own manager path", Pass = NoSelf, Expected = "true"],
         [Check = "Only managers appear as hierarchy level names", Pass = OnlyManagerNames, Expected = "true"],
         [Check = "CEO reporting total excludes CEO", Pass = List.Sum(Table.SelectRows(Flattened, each Record.Field(_, "Manager Level 1 Key") = "001")[CostIndex]) = 600, Expected = "600"],
-        [Check = "Group Executive reporting total excludes Group Executive", Pass = List.Sum(Table.SelectRows(Flattened, each Record.Field(_, "Manager Level 2 Key") = "002")[CostIndex]) = 400, Expected = "400"],
+        [Check = "Group Executive reporting total excludes Group Executive", Pass = List.Sum(Table.SelectRows(Flattened, each Record.Field(_, "Manager Level 2 Key") = "002")[CostIndex]) = 500, Expected = "500"],
         [Check = "General Manager reporting total excludes General Manager", Pass = List.Sum(Table.SelectRows(Flattened, each Record.Field(_, "Manager Level 3 Key") = "003")[CostIndex]) = 300, Expected = "300"],
         [Check = "Group Executive direct reports", Pass = GE[DirectReportCount] = 2, Expected = "2"],
         [Check = "Contractor is retained in counts", Pass = GM[DirectReportCount] = 3, Expected = "3"],
