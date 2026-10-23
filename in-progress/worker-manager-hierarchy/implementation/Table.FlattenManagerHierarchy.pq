@@ -103,7 +103,13 @@ let
                     each if _ = null then false else Text.Contains(_, "|")
                 )
             ),
-            UnknownParents = List.Difference(ParentIDs, NodeIDs),
+            // An existence test must use distinct parent keys; many employees
+            // can share one manager. Check membership explicitly to avoid
+            // treating repeated references as missing parent records.
+            UnknownParents = List.Select(
+                List.Distinct(ParentIDs),
+                (parentID) => not List.Contains(NodeIDs, parentID, Comparer.Ordinal)
+            ),
 
             ValidatedNodes =
                 if BlankIDs then
