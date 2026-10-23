@@ -48,7 +48,7 @@ The only intended modification is replacing its **\`ReverseOrderName\`** step wi
 | [tests/Test.ShiftedAncestorHierarchy.pq](tests/Test.ShiftedAncestorHierarchy.pq) | 10 behavioural acceptance checks against the patched original |
 | [tests/verification.md](tests/verification.md) | Power Query setup and expected outcomes |
 | [spec.md](spec.md) | Behavioural contract and limitations |
-| [adr/001-single-parent-worker-grain.md](adr/001-single-parent-worker-grain.md) | Design decision to extend existing function, not reinvent |
+| [adr/001-preserve-biccountant-engine.md](adr/001-preserve-biccountant-engine.md) | Design decision to preserve the BIccountant engine, not reinvent |
 
 **Source licensing:** the linked gist does not include an explicit reuse license. This repository stores **only the original independently authored replacement step** and synthetic tests, not a redistributed copy of the entire third-party function. The owner must maintain the original function locally in the Power Query project; licence/permission review is needed before distributing a complete modified upstream function as an MIT-licensed library asset.
 
