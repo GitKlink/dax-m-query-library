@@ -1,109 +1,82 @@
-# Feature specification — worker-to-manager ancestor-only hierarchy
+# Feature specification — minimal strict-ancestor display patch
 
 **Issue:** [#15](https://github.com/GitKlink/dax-m-query-library/issues/15)  
-**Status:** Proposed engineering contract; pending actual Power Query runtime verification and human acceptance.  
-**Implementation:** [Table.FlattenManagerHierarchy.pq](implementation/Table.FlattenManagerHierarchy.pq)
+**Status:** Proposed; runtime verification pending.
 
-## 🎯 User problem
+## 🎯 Objective
 
-Power BI worker/manager hierarchies conventionally make an employee part of their own subtree when the employee node is used as the final level. The intended business visual instead groups by **managers' reporting organisations**: the Group Executive belongs to their CEO's node, but not their own, while ordinary non-managers must continue to contribute to organisation metrics.
+Provide manager-only hierarchy level names for an existing BIccountant/Imke Feldmann ParentChildAllParents Power Query implementation while preserving its verified hierarchy engine, outputs and workflow.
 
-Solution boundary: perform the reshaping in Power Query/Dataflows, not a DAX self-exclusion measure; preserve original row grain and usable fact relationships.
+**Original:** https://gist.github.com/ImkeF/3a6b50e705bfbdbcb3480b6be505322a
 
-## Behavioural contract
+## Scope
 
-### Inputs
+Modify only the upstream \`ReverseOrderName\` step:
 
-- \`Source\`: table at worker grain, one row per unique \`ChildKey\`.
-- \`ChildKey\`: name of a column identifying each worker uniquely.
-- \`ParentKey\`: name of an immediate manager ID column; only graph roots can be null/empty.
-- \`DisplayName\`: name of a column containing a nonblank display name.
-- Referenced non-null parent IDs must be present as child IDs in the same input.
-- Treat child/parent keys as text identifiers; source columns are not mutated.
+- Original: reverse an assembled name path, yielding \`root → ... → current worker\`.
+- Patch: reverse the path and remove its final element, yielding \`root → ... → parent\`.
+- When the path has only the current worker (a root), return \`null\`.
+- Let the existing downstream \`ReverseOrderPath\`, column splitting, merges, leaf detection and original loop handling continue as before.
 
-### Outputs
+The patched step uses \`List.Reverse\`, \`Text.Split\`, \`List.RemoveLastN\`, and \`Text.Combine\`. It does **not** recalculate a worker's reporting path or expand ancestry differently.
 
-- All source rows, unchanged in number and source-column values.
-- \`IsManager\` and \`IsLeaf\`: structural manager/leaf flags.
-- \`DirectReportCount\`: source-graph direct-worker count, independent of labour-force eligibility.
-- \`HasManagerReports\`: flag indicating a manager has a direct report who is also a manager.
-- \`ManagerHierarchyDepth\`: count of strict ancestors; root = 0.
-- \`HasManagerNode\`: false for rows with no strict ancestors.
-- \`ManagerPathIDs\`: \`|\`-delimited ID path from root to immediate manager, omitting current worker.
-- Paired \`Manager Level N\` name and \`Manager Level N Key\` ID columns for each level up to maximum path depth. Names are display-only; IDs represent identity.
-- Nullable values for missing trailing levels, never a self/worker name injected as a filler.
-- Source columns retain their original Power Query column values and intended types.
+## Existing API — unchanged
 
-### Semantic invariants
+\`\`\`powerquery
+Query1(ParChTable as table, ChildKey as text, ParentKey as text, LevelColumnName as text)
+\`\`\`
 
-1. **Self exclusion:** For every worker \`w\`, \`w\` must not occur in the worker's manager-level key path.
-2. **Ancestor correctness:** A manager ID occurs in \`w\`'s path iff it is a strict ancestor of \`w\` in the supplied graph.
-3. **Manager-only level names:** Every non-null hierarchy display value resolves to a structural manager.
-4. **One row per worker:** Cardinality remains unchanged from the input; no ancestor expansion into worker duplicates.
-5. **Native aggregation:** Manager organisation totals can be evaluated by filtering the worker dimension on manager levels, with ordinary SUM/COUNT semantics where the fact model is properly keyed.
-6. **No automatic eligibility rules:** \`IsManager\` does not mean employee-only manager; counts do not exclude contractors.
-7. **No access grant:** Hierarchy membership is not row-level security.
+\`Query1\` refers to the existing function query name visible in the user's screenshot, not a new API or replacement module. Child/parent IDs may be numeric in the source; upstream converts them to text for paths.
 
-### Rejection behaviour
+## Output contract
 
-| Input defect | Error identifier | Intended response |
+| Field | Change? | Contract |
 | --- | --- | --- |
-| Key/name columns absent | \`MissingColumns\` | Name the missing columns |
-| Input selector columns identical | \`InvalidColumns\` | Require three distinct selector names |
-| Existing result columns collide | \`OutputColumnCollision\` | Rename or remove conflicting source columns |
-| Null/empty worker key | \`BlankWorkerID\` | Stop |
-| Duplicate worker key (incl. alternate managers) | \`DuplicateWorkerID\` | Stop; multi-parent unsupported |
-| Null/blank worker display name | \`BlankDisplayName\` | Stop |
-| Pipe in worker key | \`InvalidWorkerID\` | Stop; delimiter forbidden |
-| Unknown manager ID | \`UnknownParent\` | Stop; no synthetic ancestor inserted |
-| Worker directly or indirectly manages self | \`HierarchyCycle\` | Stop with repeated ID |
+| \`Level 1\`…\`Level N\` | **YES** | Root-first, strict ancestor **name** values only, never the worker's own name |
+| \`NodeKey\` | No | Worker identity |
+| \`FirstName\` | No | Worker display name |
+| \`FirstParentKey\` | No | Immediate reporting parent |
+| \`Path\` | No | ID path retains original inclusive self; **not safe to assume strict-ancestor RLS** |
+| \`HierarchyDepth\` | No | Original inclusive hierarchy depth |
+| \`IsLeaf\` | No | Original boolean leaf indicator; \`false\` = manager |
+| Other original fields | No | Original behaviour, including multiple parents and missing-parent conventions |
 
-### Expected result on synthetic example
+## Core requirements
 
-\`\`\`text
-Worker        Path IDs         Display manager path
-CEO           null             (none)
-Group Exec    001              CEO
-General Mgr   001|002          CEO > Group Executive
-Employee A    001|002|003      CEO > Group Executive > General Manager
-Employee B    001|002|003      CEO > Group Executive > General Manager
-Employee C    001|002          CEO > Group Executive
-Contractor D  001|002|003      CEO > Group Executive > General Manager
-\`\`\`
+1. A manager appears as a worker record under its own superior, but never as a display level on its own record.
+2. A non-manager's record retains all manager ancestors, and its own name never appears as a display level.
+3. All input rows remain available; do not filter the table using \`IsLeaf\` or \`IsManager\`.
+4. Preserve the original function's capacity for multiple parents, missing-parent handling and endless-loop detection by not touching their steps. Any existing row multiplication from multi-parent inputs remains.
+5. Users can apply the modification by replacing one M step, with no new function arguments, source conversion, RLS change or model-measure dependency.
+6. Do not redistribute the complete third-party source without reviewing licensing/permission; feature repo contains replacement snippet and test harness only.
 
-The CEO, Group Executive and General Manager strict-descendant counts are 6, 5 and 3, respectively, when including all synthetic source workers. \`DirectReportCount\` for these same nodes is 1, 2 and 3. Both numbers are valid but have different meanings.
+## Test fixtures and expected values
 
-## Data-flow design
+Use synthetic numeric IDs and repeatedly referenced parent key (CEO has four direct reports) to reproduce the user's \`UnknownParent\` issue and ensure the original, correctly distincted missing-parent check continues to work.
 
 \`\`\`text
-worker/manager edges
-    -> validate required fields, unique IDs, complete graph
-    -> indexed ID -> (parent, name) lookup
-    -> per-worker ancestor traversal + cycle detection
-    -> reverse ancestry to root-first order
-    -> depth-dependent name/ID columns + manager metadata
-    -> original worker rows with new columns
-    -> manager-only row hierarchy in Power BI model
+worker      Level 1    Level 2            Level 3
+CEO         null       null               null
+Group Exec  CEO        null               null
+GM          CEO        Group Executive    null
+Employee A  CEO        Group Executive    General Manager
+Employee C  CEO        null               null
 \`\`\`
 
-### Explicit out of scope
+No employee or contractor display names should be present in any non-null \`Level N\`.
 
-- No change to original Imke Feldmann gist code, which supports multiple parents.
-- No DAX measure to hide a worker.
-- No guaranteed removal of \`(Blank)\` nodes in a ragged native Power BI Matrix by M fields alone.
-- No contractor/employee-specific business logic or manager permission design.
-- No automatic construction of an aggregated manager fact table; may be a separate future feature.
-- No duplicate-name disambiguation policy based on arbitrary domain identifiers; IDs are provided so a model can implement unique labels.
-- No inferred ancestors across missing or filtered-out managers.
+## Non-goals / caveats
 
-## 🧪 Test plan / acceptance gates
+- No new general-purpose hierarchy algorithm, RLS bridge, manager count logic or replacement for original recursion.
+- Native Matrix ragged blanks remain an open **visual presentation** concern.
+- No assumption that standard Matrix child branch values sum to manager totals, since direct reports at shorter depth are still included in ancestor total.
+- Worker IDs, not display names, must remain the security identity.
+- The original \`Path\` field remains self-inclusive: do **not** change RLS based only on new level presentation.
 
-**Static/spec review:** verify the M source uses ID-based ancestry rather than display-name matching, preserves originals, and never appends worker self.
+## Acceptance gate
 
-**Runtime suite:** load \`tests/Test.FlattenManagerHierarchy.pq\` in Power BI Desktop or an equivalent Power Query evaluator and require every \`Pass\` to be \`true\`; capture test results and exact engine version if available.
-
-**Matrix evaluation:** place the manager display level columns in a native Matrix using synthetic amounts; verify manager filtering, ragged blank branches, child sum differences and whether user-accepted presentation needs a future enhancement.
-
-**Refresh/performance:** representative worker volume, real source key types, different hierarchy depths, multiple roots, contractor managers where applicable. Record whether the implementation is acceptable for Dataflows and Desktop.
-
-**Publication gate:** only after actual runtime verification, reviewer agreement on the subtotal/drill limitations, and final PR review may implementation move to \`library/m/functions/table/\`. Move the record to \`features/\` only at feature completion.
+1. Code diff contains only a step replacement **to be applied locally to upstream source** plus test/docs; no copied upstream body.
+2. 10 synthetic checks in Power Query return \`Pass = true\`, including multiple numeric workers sharing a manager ID.
+3. Real sample shows CEO's own \`Level 1\` blank and Group Executive's \`Level 1\` CEO; existing missing-parent error is absent.
+4. Native Matrix view tested, blank drill branches documented, and existing RLS retested.
+5. Human approves PR; do not merge/publish as a complete re-licensed function without permission to redistribute upstream code.
