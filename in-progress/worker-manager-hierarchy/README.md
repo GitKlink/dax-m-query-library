@@ -1,6 +1,6 @@
 # Manager-only shifted ancestor hierarchy — minimal BIccountant patch
 
-**Stage:** Draft patch under feature issue [#15](https://github.com/GitKlink/dax-m-query-library/issues/15) and [PR #16](https://github.com/GitKlink/dax-m-query-library/pull/16). **Power Query runtime test pending.**
+**Stage:** Draft patch under feature issue [#15](https://github.com/GitKlink/dax-m-query-library/issues/15) and [PR #16](https://github.com/GitKlink/dax-m-query-library/pull/17). **Power Query runtime test pending.**
 
 ## 🎯 What this solves
 
