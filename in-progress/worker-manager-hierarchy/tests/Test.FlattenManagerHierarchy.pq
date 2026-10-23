@@ -105,7 +105,30 @@ let
         {{"00|1", null, "CEO"}}
     ),
 
+    // Regression: the worker IDs may be numeric and the same manager can
+    // be referenced by many workers. This must not trigger UnknownParent.
+    NumericWorkers = #table(
+        type table [UserID = Int64.Type, MgrUserID = nullable number, Name = text],
+        {
+            {1000, null, "Root"},
+            {1001, 1000, "Manager A"},
+            {1002, 1000, "Manager B"},
+            {1003, 1000, "Employee C"},
+            {1004, 1000, "Employee D"},
+            {1005, 1000, "Employee E"}
+        }
+    ),
+    NumericResult = Table.Buffer(
+        Fn(NumericWorkers, "UserID", "MgrUserID", "Name")
+    ),
+    NumericChildren = Table.ToRecords(
+        Table.SelectRows(NumericResult, each [UserID] <> 1000)
+    ),
+    NumericRoot = Table.SelectRows(NumericResult, each [UserID] = 1000){0},
+
     Checks = {
+        [Check = "Numeric keys: repeated manager reference does not trigger UnknownParent", Pass = Table.RowCount(NumericResult) = 6 and NumericRoot[DirectReportCount] = 5, Expected = "6 rows, root has 5 reports"],
+        [Check = "Numeric keys: all child ancestor IDs are the same manager", Pass = List.AllTrue(List.Transform(NumericChildren, each Record.Field(_, "Manager Level 1 Key") = "1000")), Expected = "All child level 1 keys are text 1000"],
         [Check = "Source row grain preserved", Pass = Table.RowCount(Flattened) = 7, Expected = "7 rows"],
         [Check = "Original numeric values preserved", Pass = List.Sum(Flattened[CostIndex]) = 700, Expected = "700"],
         [Check = "CEO's own row has no manager node", Pass = CEO[ManagerHierarchyDepth] = 0 and CEO[HasManagerNode] = false, Expected = "0 / false"],
